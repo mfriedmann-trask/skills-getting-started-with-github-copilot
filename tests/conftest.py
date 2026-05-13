@@ -1,0 +1,25 @@
+import copy
+import sys
+from pathlib import Path
+
+from fastapi.testclient import TestClient
+import pytest
+
+ROOT = Path(__file__).resolve().parent.parent
+SRC_DIR = ROOT / "src"
+sys.path.insert(0, str(SRC_DIR))
+
+import app as app_module
+
+
+@pytest.fixture(scope="session")
+def client():
+    return TestClient(app_module.app)
+
+
+@pytest.fixture(autouse=True)
+def reset_activities():
+    original_activities = copy.deepcopy(app_module.activities)
+    yield
+    app_module.activities.clear()
+    app_module.activities.update(copy.deepcopy(original_activities))
